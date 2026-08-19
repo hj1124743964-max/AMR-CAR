@@ -1,8 +1,8 @@
 version: "4.1"
-name: OLED
+name: AMR_CAR
 type: ARM
 deviceName: null
-packDir: null
+packDir: .pack/Keil/STM32F4xx_DFP.2.14.0
 srcDirs: []
 virtualFolder:
   name: <virtual_root>
@@ -13,6 +13,7 @@ virtualFolder:
         - path: main.c
         - path: stm32f4xx_it.c
         - path: system_stm32f4xx.c
+        - path: app/app_tasks.c
       folders: []
     - name: HARDWARE
       files:
@@ -41,6 +42,21 @@ virtualFolder:
       files:
         - path: ../readme.txt
       folders: []
+    - name: FreeRTOS_CORE
+      files:
+        - path: ../freertos/croutine.c
+        - path: ../freertos/event_groups.c
+        - path: ../freertos/list.c
+        - path: ../freertos/queue.c
+        - path: ../freertos/stream_buffer.c
+        - path: ../freertos/tasks.c
+        - path: ../freertos/timers.c
+      folders: []
+    - name: FreeRTOS_PROTABLE
+      files:
+        - path: ../freertos/portable/RVDS/ARM_CM4F/port.c
+        - path: ../freertos/portable/MemMang/heap_4.c
+      folders: []
 dependenceList: []
 outDir: build
 miscInfo:
@@ -62,6 +78,11 @@ targets:
         - ../FWLIB/inc
         - .cmsis/include
         - RTE/_OLED
+        - ../freertos/portable
+        - ../freertos/portable/RVDS/ARM_CM4F
+        - ../freertos/portable/MemMang
+        - ../freertos/include
+        - app
       libList: []
     excludeList: []
     settings:

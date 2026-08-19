@@ -4,17 +4,27 @@
 #include "sys.h"
 #include "stdlib.h"	
 
+//-----------------测试LED端口定义---------------- 
+
+#define LED_ON GPIO_ResetBits(GPIOC,GPIO_Pin_12)
+#define LED_OFF GPIO_SetBits(GPIOC,GPIO_Pin_12)
 
 //-----------------OLED端口定义---------------- 
 
-#define OLED_SCL_Clr() GPIO_ResetBits(GPIOG,GPIO_Pin_14)//SCL
-#define OLED_SCL_Set() GPIO_SetBits(GPIOG,GPIO_Pin_14)
+#define OLED_SCL_Clr() GPIO_ResetBits(GPIOC,GPIO_Pin_15)//SCL
+#define OLED_SCL_Set() GPIO_SetBits(GPIOC,GPIO_Pin_15)
 
-#define OLED_SDA_Clr() GPIO_ResetBits(GPIOD,GPIO_Pin_13)//DIN
-#define OLED_SDA_Set() GPIO_SetBits(GPIOD,GPIO_Pin_13)
+#define OLED_SDA_Clr() GPIO_ResetBits(GPIOC,GPIO_Pin_14)//SDA
+#define OLED_SDA_Set() GPIO_SetBits(GPIOC,GPIO_Pin_14)
 
-#define OLED_RES_Clr() GPIO_ResetBits(GPIOD,GPIO_Pin_12)//RES
-#define OLED_RES_Set() GPIO_SetBits(GPIOD,GPIO_Pin_12)
+#define OLED_RES_Clr() GPIO_ResetBits(GPIOC,GPIO_Pin_13)//RES
+#define OLED_RES_Set() GPIO_SetBits(GPIOC,GPIO_Pin_13)
+
+#define OLED_DC_Clr()  GPIO_ResetBits(GPIOE,GPIO_Pin_4)//DC
+#define OLED_DC_Set()  GPIO_SetBits(GPIOE,GPIO_Pin_4)
+ 		     
+#define OLED_CS_Clr()  GPIO_ResetBits(GPIOD,GPIO_Pin_1)//CS
+#define OLED_CS_Set()  GPIO_SetBits(GPIOD,GPIO_Pin_1)
 
 
 #define OLED_CMD  0	//写命令
@@ -23,10 +33,6 @@
 void OLED_ClearPoint(u8 x,u8 y);
 void OLED_ColorTurn(u8 i);
 void OLED_DisplayTurn(u8 i);
-void I2C_Start(void);
-void I2C_Stop(void);
-void I2C_WaitAck(void);
-void Send_Byte(u8 dat);
 void OLED_WR_Byte(u8 dat,u8 mode);
 void OLED_DisPlay_On(void);
 void OLED_DisPlay_Off(void);

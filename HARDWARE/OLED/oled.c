@@ -33,80 +33,26 @@ void OLED_DisplayTurn(u8 i)
 		}
 }
 
-//延时
-void IIC_delay(void)
-{
-	u8 t=10;
-	while(t--);
-}
-
-//起始信号
-void I2C_Start(void)
-{
-	OLED_SDA_Set();
-	OLED_SCL_Set();
-	IIC_delay();
-	OLED_SDA_Clr();
-	IIC_delay();
-	OLED_SCL_Clr();
-	IIC_delay();
-}
-
-//结束信号
-void I2C_Stop(void)
-{
-	OLED_SDA_Clr();
-	OLED_SCL_Set();
-	IIC_delay();
-	OLED_SDA_Set();
-}
-
-//等待信号响应
-void I2C_WaitAck(void) //测数据信号的电平
-{
-	OLED_SDA_Set();
-	IIC_delay();
-	OLED_SCL_Set();
-	IIC_delay();
-	OLED_SCL_Clr();
-	IIC_delay();
-}
-
-//写入一个字节
-void Send_Byte(u8 dat)
-{
-	u8 i;
+void OLED_WR_Byte(u8 dat,u8 cmd)
+{	
+	u8 i;			  
+	if(cmd)
+	  OLED_DC_Set();
+	else
+	  OLED_DC_Clr();
+	OLED_CS_Clr();
 	for(i=0;i<8;i++)
 	{
-		if(dat&0x80)//将dat的8位从最高位依次写入
-		{
-			OLED_SDA_Set();
-    }
-		else
-		{
-			OLED_SDA_Clr();
-    }
-		IIC_delay();
+		OLED_SCL_Clr();
+		if(dat&0x80)
+		   OLED_SDA_Set();
+		else 
+		   OLED_SDA_Clr();
 		OLED_SCL_Set();
-		IIC_delay();
-		OLED_SCL_Clr();//将时钟信号设置为低电平
-		dat<<=1;
-  }
-}
-
-//发送一个字节
-//mode:数据/命令标志 0,表示命令;1,表示数据;
-void OLED_WR_Byte(u8 dat,u8 mode)
-{
-	I2C_Start();
-	Send_Byte(0x78);
-	I2C_WaitAck();
-	if(mode){Send_Byte(0x40);}
-  else{Send_Byte(0x00);}
-	I2C_WaitAck();
-	Send_Byte(dat);
-	I2C_WaitAck();
-	I2C_Stop();
+		dat<<=1;   
+	}				 		  
+	OLED_CS_Set();
+	OLED_DC_Set();   	  
 }
 
 //开启OLED显示 
@@ -131,20 +77,11 @@ void OLED_Refresh(void)
 	u8 i,n;
 	for(i=0;i<8;i++)
 	{
-		OLED_WR_Byte(0xb0+i,OLED_CMD); //设置行起始地址
-		OLED_WR_Byte(0x00,OLED_CMD);   //设置低列起始地址
-		OLED_WR_Byte(0x10,OLED_CMD);   //设置高列起始地址
-		I2C_Start();
-		Send_Byte(0x78);
-		I2C_WaitAck();
-		Send_Byte(0x40);
-		I2C_WaitAck();
-		for(n=0;n<128;n++)
-		{
-			Send_Byte(OLED_GRAM[n][i]);
-			I2C_WaitAck();
-		}
-		I2C_Stop();
+	   OLED_WR_Byte(0xb0+i,OLED_CMD); //设置行起始地址
+	   OLED_WR_Byte(0x00,OLED_CMD);   //设置低列起始地址
+	   OLED_WR_Byte(0x10,OLED_CMD);   //设置高列起始地址
+	   for(n=0;n<128;n++)
+		 OLED_WR_Byte(OLED_GRAM[n][i],OLED_DATA);
   }
 }
 //清屏函数
@@ -449,25 +386,29 @@ void OLED_ShowPicture(u8 x,u8 y,u8 sizex,u8 sizey,u8 BMP[],u8 mode)
 void OLED_Init(void)
 {
   GPIO_InitTypeDef  GPIO_InitStructure;
-	TIM_TimeBaseInitTypeDef  TIM_TimeBaseStructure;
-	RCC_AHB1PeriphClockCmd(RCC_AHB1Periph_GPIOD|RCC_AHB1Periph_GPIOG,ENABLE);//使能PORTA~E,PORTG时钟
+	
+	RCC_AHB1PeriphClockCmd(RCC_AHB1Periph_GPIOC|RCC_AHB1Periph_GPIOE|RCC_AHB1Periph_GPIOG,ENABLE);//使能PORTA~E,PORTG时钟
   	
 	//GPIO初始化设置
-  GPIO_InitStructure.GPIO_Pin = GPIO_Pin_5;
+  GPIO_InitStructure.GPIO_Pin = GPIO_Pin_1|GPIO_Pin_14|GPIO_Pin_13|GPIO_Pin_15 ;
   GPIO_InitStructure.GPIO_Mode = GPIO_Mode_OUT;//普通输出模式
-  GPIO_InitStructure.GPIO_OType = GPIO_OType_OD;//推挽输出
+  GPIO_InitStructure.GPIO_OType = GPIO_OType_PP;//推挽输出
   GPIO_InitStructure.GPIO_Speed = GPIO_Speed_100MHz;//100MHz
   GPIO_InitStructure.GPIO_PuPd = GPIO_PuPd_UP;//上拉
-  GPIO_Init(GPIOD, &GPIO_InitStructure);//初始化
-	
-	GPIO_InitStructure.GPIO_Pin = GPIO_Pin_4;
-	GPIO_InitStructure.GPIO_OType = GPIO_OType_PP;//推挽输出
-	GPIO_Init(GPIOD, &GPIO_InitStructure);//初始化
+  GPIO_Init(GPIOC, &GPIO_InitStructure);//初始化
+
+	//GPIO初始化设置
+  GPIO_InitStructure.GPIO_Pin = GPIO_Pin_4|GPIO_Pin_10;
+  GPIO_InitStructure.GPIO_Mode = GPIO_Mode_OUT;//普通输出模式
+  GPIO_InitStructure.GPIO_OType = GPIO_OType_PP;//推挽输出
+  GPIO_InitStructure.GPIO_Speed = GPIO_Speed_100MHz;//100MHz
+  GPIO_InitStructure.GPIO_PuPd = GPIO_PuPd_UP;//上拉
+  GPIO_Init(GPIOE, &GPIO_InitStructure);//初始化
 	
 	//GPIO初始化设置
   GPIO_InitStructure.GPIO_Pin = GPIO_Pin_12;
   GPIO_InitStructure.GPIO_Mode = GPIO_Mode_OUT;//普通输出模式
-  GPIO_InitStructure.GPIO_OType = GPIO_OType_OD;//推挽输出
+  GPIO_InitStructure.GPIO_OType = GPIO_OType_PP;//推挽输出
   GPIO_InitStructure.GPIO_Speed = GPIO_Speed_100MHz;//100MHz
   GPIO_InitStructure.GPIO_PuPd = GPIO_PuPd_UP;//上拉
   GPIO_Init(GPIOG, &GPIO_InitStructure);//初始化
